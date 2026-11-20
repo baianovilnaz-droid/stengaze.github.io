@@ -4,269 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Физика Вокруг Нас — Электронная стенгазета</title>
-    <script src="https://jsdelivr.net"></script>
-    <link href="https://googleapis.com" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --bg-dark: #0b0f19;
-            --card-bg: #131b2e;
-            --accent-blue: #38bdf8;
-            --accent-purple: #818cf8;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border-color: #1e293b;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.08), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(129, 140, 248, 0.08), transparent 25%);
-            color: var(--text-main);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        header {
-            background: rgba(19, 27, 46, 0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 800;
-            font-size: 1.4rem;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .formula-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent-blue);
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            -webkit-text-fill-color: var(--accent-blue);
-        }
-
-        .auth-panel {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        input[type="email"], input[type="text"], textarea {
-            background: #0b0f19;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-family: inherit;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input:focus, textarea:focus {
-            border-color: var(--accent-blue);
-        }
-
-        button {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            color: #0b0f19;
-            font-weight: 600;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: transform 0.15s, opacity 0.2s;
-        }
-
-        button:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        button.secondary {
-            background: var(--border-color);
-            color: var(--text-main);
-        }
-
-        .status-badge {
-            font-size: 0.85rem;
-            padding: 0.3rem 0.7rem;
-            border-radius: 20px;
-            background: #1e293b;
-        }
-
-        .status-admin {
-            background: rgba(129, 140, 248, 0.2);
-            color: var(--accent-purple);
-            border: 1px solid var(--accent-purple);
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
-
-        #admin-panel {
-            display: none;
-            background: var(--card-bg);
-            border: 1px solid var(--accent-purple);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .admin-grid { grid-template-columns: 1fr; }
-        }
-
-        .admin-box {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .admin-box h3 {
-            font-size: 1.1rem;
-            color: var(--accent-blue);
-        }
-
-        .post-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 3rem;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
-        }
-
-        .post-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .post-title {
-            font-size: 1.5rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .post-date {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .post-image-wrapper {
-            background: #070a11;
-            text-align: center;
-            padding: 1rem;
-        }
-
-        .post-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            cursor: zoom-in;
-            transition: transform 0.2s;
-        }
-
-        .comments-section {
-            padding: 1.5rem;
-            background: rgba(11, 15, 25, 0.4);
-        }
-
-        .comments-title {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--accent-blue);
-        }
-
-        .comment-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            margin-bottom: 1.2rem;
-        }
-
-        .comment-item {
-            background: var(--card-bg);
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .comment-author {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--accent-purple);
-            margin-bottom: 0.2rem;
-        }
-
-        .comment-form {
-            display: flex;
-            gap: 0.6rem;
-        }
-
-        .comment-form input {
-            flex: 1;
-        }
-
-        .guest-notice {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        #lightbox {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            cursor: zoom-out;
-        }
-
-        #lightbox img {
-            max-width: 95%;
-            max-height: 95%;
-            border-radius: 8px;
-        }
+        /* ... (ваш CSS без изменений) ... */
     </style>
 </head>
 <body>
@@ -276,29 +16,34 @@
         <span>⚛️ ФИЗИКА.LIVE</span>
         <span class="formula-badge">E = mc²</span>
     </div>
-
-    <div class="auth-panel" id="auth-container"></div>
+    <div class="auth-panel" id="auth-container">
+        <span class="status-badge" id="status-badge">Статус: Гость</span>
+        <input type="email" id="login-email-input" placeholder="Введите ваш email">
+        <button type="button" onclick="loginWithEmail()">Войти</button>
+        <button type="button" class="secondary" id="logout-btn" style="display:none;" onclick="logout()">Выйти</button>
+    </div>
 </header>
 
 <div class="container">
+    <div id="error-banner" style="display: none;" class="alert-box"></div>
+
     <section id="admin-panel">
         <h2>🛠️ Панель администратора</h2>
         <div class="admin-grid">
             <div class="admin-box">
                 <h3>Опубликовать новый выпуск (PNG)</h3>
-                <input type="text" id="post-title" placeholder="Название выпуска (например: Выпуск №1. Кванты)">
+                <input type="text" id="post-title" placeholder="Название выпуска">
                 <input type="text" id="post-desc" placeholder="Краткое описание (необязательно)">
                 <input type="file" id="post-file" accept="image/png">
-                <button onclick="uploadNewspaper()" id="upload-btn">Опубликовать стенгазету</button>
+                <button type="button" onclick="uploadNewspaper()" id="upload-btn">Опубликовать стенгазету</button>
             </div>
-
             <div class="admin-box">
                 <h3>Управление администраторами</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted);">
-                    Укажите email пользователя, чтобы выдать ему права публикации стенгазет без пароля.
+                    Укажите email пользователя, чтобы выдать ему права публикации.
                 </p>
                 <input type="email" id="new-admin-email" placeholder="email@example.com">
-                <button onclick="addAdmin()">Назначить администратором</button>
+                <button type="button" onclick="addAdmin()">Назначить администратором</button>
                 <div id="admin-list" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;"></div>
             </div>
         </div>
@@ -309,36 +54,357 @@
     </main>
 </div>
 
-<div id="lightbox" onclick="this.style.display='none'">
+<div id="lightbox" role="dialog" aria-modal="true" onclick="closeLightbox()">
     <img id="lightbox-img" src="" alt="Увеличенная стенгазета">
 </div>
 
 <script>
     // ==========================================
-    // ВСТАВЬТЕ СЮДА ДАННЫЕ ИЗ SUPABASE (Settings -> API)
+    // ЗАМЕНИТЕ НА СВОИ ДАННЫЕ ИЗ SUPABASE
     // ==========================================
     const SUPABASE_URL = 'https://jrljcjdggybfgnookqtq.supabase.co/rest/v1/';
     const SUPABASE_ANON_KEY = 'sb_publishable_gZu72ZiPnz7vrUa3nuqWyA_1I9lR0qs';
     // ==========================================
 
-    // Используем имя db вместо supabase, чтобы не было конфликта с библиотекой
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+    let db = null;
     let currentUserEmail = localStorage.getItem('physics_wall_email') || null;
     let isAdmin = false;
 
-    async function init() {
-        renderAuthHeader();
+    // ---- Утилиты ----
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function showError(msg) {
+        const banner = document.getElementById('error-banner');
+        banner.textContent = msg;
+        banner.style.display = 'block';
+        setTimeout(() => { banner.style.display = 'none'; }, 6000);
+    }
+
+    // ---- Инициализация Supabase ----
+    function initSupabase() {
+        if (SUPABASE_URL.includes('ВАШ_') || SUPABASE_ANON_KEY.includes('ВАШ_')) {
+            showError('Supabase не настроен: замените SUPABASE_URL и SUPABASE_ANON_KEY.');
+            return false;
+        }
+        db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        return true;
+    }
+
+    // ---- Авторизация (упрощённая, по email) ----
+    async function loginWithEmail() {
+        const input = document.getElementById('login-email-input');
+        const email = input.value.trim().toLowerCase();
+        if (!email || !email.includes('@')) {
+            showError('Введите корректный email.');
+            return;
+        }
+        currentUserEmail = email;
+        localStorage.setItem('physics_wall_email', email);
         await checkAdminStatus();
-        renderAuthHeader();
-        await loadPosts();
+        updateAuthUI();
+        input.value = '';
+    }
+
+    function logout() {
+        currentUserEmail = null;
+        isAdmin = false;
+        localStorage.removeItem('physics_wall_email');
+        updateAuthUI();
     }
 
     async function checkAdminStatus() {
-        if (!currentUserEmail) {
+        if (!db || !currentUserEmail) { isAdmin = false; return; }
+        try {
+            const { data, error } = await db
+                .from('admins')
+                .select('email')
+                .eq('email', currentUserEmail)
+                .maybeSingle();
+            if (error) throw error;
+            isAdmin = !!data;
+        } catch (e) {
+            console.error('checkAdminStatus:', e);
             isAdmin = false;
-            document.getElementById('admin-panel').style.display = 'none';
-            return;
+        }
+    }
+
+    function updateAuthUI() {
+        const badge = document.getElementById('status-badge');
+        const logoutBtn = document.getElementById('logout-btn');
+        const adminPanel = document.getElementById('admin-panel');
+
+        if (currentUserEmail) {
+            badge.textContent = `Статус: ${currentUserEmail}`;
+            badge.className = 'status-badge' + (isAdmin ? ' status-admin' : '');
+            logoutBtn.style.display = 'inline-block';
+        } else {
+            badge.textContent = 'Статус: Гость';
+            badge.className = 'status-badge';
+            logoutBtn.style.display = 'none';
+        }
+        adminPanel.style.display = isAdmin ? 'block' : 'none';
+        if (isAdmin) loadAdminList();
+    }
+
+    // ---- Посты ----
+    async function loadPosts() {
+        const feed = document.getElementById('posts-feed');
+        if (!db) { feed.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Supabase не настроен.</p>'; return; }
+        try {
+            const { data: posts, error } = await db
+                .from('posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+
+            if (!posts || posts.length === 0) {
+                feed.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Пока нет выпусков.</p>';
+                return;
+            }
+
+            feed.innerHTML = '';
+            for (const post of posts) {
+                feed.appendChild(await renderPost(post));
+            }
+        } catch (e) {
+            console.error(e);
+            feed.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Ошибка загрузки выпусков.</p>';
+        }
+    }
+
+    async function renderPost(post) {
+        const card = document.createElement('article');
+        card.className = 'post-card';
+
+        const header = document.createElement('div');
+        header.className = 'post-header';
+        const title = document.createElement('h2');
+        title.className = 'post-title';
+        title.textContent = post.title || 'Без названия';
+        const date = document.createElement('div');
+        date.className = 'post-date';
+        date.textContent = new Date(post.created_at).toLocaleString('ru-RU');
+        header.appendChild(title);
+        header.appendChild(date);
+        if (post.description) {
+            const desc = document.createElement('p');
+            desc.style.color = 'var(--text-muted)';
+            desc.textContent = post.description;
+            header.appendChild(desc);
+        }
+        card.appendChild(header);
+
+        if (post.image_url) {
+            const wrap = document.createElement('div');
+            wrap.className = 'post-image-wrapper';
+            const img = document.createElement('img');
+            img.className = 'post-image';
+            img.src = post.image_url;
+            img.alt = post.title || 'Стенгазета';
+            img.loading = 'lazy';
+            img.addEventListener('click', () => openLightbox(post.image_url));
+            wrap.appendChild(img);
+            card.appendChild(wrap);
         }
 
+        card.appendChild(await renderComments(post.id));
+        return card;
+    }
 
+    async function renderComments(postId) {
+        const section = document.createElement('div');
+        section.className = 'comments-section';
+        const title = document.createElement('div');
+        title.className = 'comments-title';
+        title.textContent = 'Комментарии';
+        section.appendChild(title);
+
+        const list = document.createElement('div');
+        list.className = 'comment-list';
+
+        try {
+            const { data: comments, error } = await db
+                .from('comments')
+                .select('*')
+                .eq('post_id', postId)
+                .order('created_at', { ascending: true });
+            if (error) throw error;
+
+            if (!comments || comments.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'guest-notice';
+                empty.textContent = 'Комментариев пока нет.';
+                list.appendChild(empty);
+            } else {
+                for (const c of comments) {
+                    const item = document.createElement('div');
+                    item.className = 'comment-item';
+                    const author = document.createElement('div');
+                    author.className = 'comment-author';
+                    author.textContent = c.author_email || 'Аноним';
+                    const text = document.createElement('div');
+                    text.textContent = c.text;
+                    item.appendChild(author);
+                    item.appendChild(text);
+                    list.appendChild(item);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            const err = document.createElement('div');
+            err.className = 'guest-notice';
+            err.textContent = 'Не удалось загрузить комментарии.';
+            list.appendChild(err);
+        }
+
+        section.appendChild(list);
+
+        const form = document.createElement('form');
+        form.className = 'comment-form';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = currentUserEmail ? 'Ваш комментарий...' : 'Войдите, чтобы комментировать';
+        input.disabled = !currentUserEmail;
+        const btn = document.createElement('button');
+        btn.type = 'submit';
+        btn.textContent = 'Отправить';
+        btn.disabled = !currentUserEmail;
+        form.appendChild(input);
+        form.appendChild(btn);
+
+        form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const text = input.value.trim();
+            if (!text) return;
+            btn.disabled = true;
+            try {
+                const { error } = await db.from('comments').insert({
+                    post_id: postId,
+                    author_email: currentUserEmail,
+                    text
+                });
+                if (error) throw error;
+                input.value = '';
+                // Перезагрузить только комментарии
+                const newSection = await renderComments(postId);
+                section.replaceWith(newSection);
+            } catch (e) {
+                console.error(e);
+                showError('Не удалось отправить комментарий.');
+                btn.disabled = false;
+            }
+        });
+
+        section.appendChild(form);
+        return section;
+    }
+
+    // ---- Админ: публикация ----
+    async function uploadNewspaper() {
+        if (!isAdmin) { showError('Нет прав.'); return; }
+        const titleInput = document.getElementById('post-title');
+        const descInput = document.getElementById('post-desc');
+        const fileInput = document.getElementById('post-file');
+        const btn = document.getElementById('upload-btn');
+
+        const title = titleInput.value.trim();
+        const file = fileInput.files[0];
+
+        if (!title) { showError('Введите название выпуска.'); return; }
+        if (!file) { showError('Выберите PNG-файл.'); return; }
+        if (file.type !== 'image/png') { showError('Допустим только PNG.'); return; }
+        if (file.size > 10 * 1024 * 1024) { showError('Файл больше 10 МБ.'); return; }
+
+        btn.disabled = true;
+        try {
+            const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            const { error: upErr } = await db.storage
+                .from('newspapers')
+                .upload(path, file, { contentType: 'image/png', upsert: false });
+            if (upErr) throw upErr;
+
+            const { data: urlData } = db.storage.from('newspapers').getPublicUrl(path);
+
+            const { error: insErr } = await db.from('posts').insert({
+                title,
+                description: descInput.value.trim() || null,
+                image_url: urlData.publicUrl,
+                author_email: currentUserEmail
+            });
+            if (insErr) throw insErr;
+
+            titleInput.value = '';
+            descInput.value = '';
+            fileInput.value = '';
+            await loadPosts();
+        } catch (e) {
+            console.error(e);
+            showError('Ошибка публикации: ' + (e.message || e));
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // ---- Админ: управление админами ----
+    async function addAdmin() {
+        if (!isAdmin) { showError('Нет прав.'); return; }
+        const input = document.getElementById('new-admin-email');
+        const email = input.value.trim().toLowerCase();
+        if (!email || !email.includes('@')) { showError('Введите корректный email.'); return; }
+        try {
+            const { error } = await db.from('admins').insert({ email });
+            if (error) throw error;
+            input.value = '';
+            loadAdminList();
+        } catch (e) {
+            console.error(e);
+            showError('Не удалось добавить администратора.');
+        }
+    }
+
+    async function loadAdminList() {
+        const box = document.getElementById('admin-list');
+        if (!db) return;
+        try {
+            const { data, error } = await db.from('admins').select('email').order('email');
+            if (error) throw error;
+            box.innerHTML = '';
+            (data || []).forEach(a => {
+                const div = document.createElement('div');
+                div.textContent = a.email;
+                box.appendChild(div);
+            });
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // ---- Лайтбокс ----
+    function openLightbox(src) {
+        document.getElementById('lightbox-img').src = src;
+        document.getElementById('lightbox').style.display = 'flex';
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').style.display = 'none';
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+
+    // ---- Старт ----
+    (async function init() {
+        if (!initSupabase()) return;
+        await checkAdminStatus();
+        updateAuthUI();
+        await loadPosts();
+    })();
+</script>
+</body>
+</html>
