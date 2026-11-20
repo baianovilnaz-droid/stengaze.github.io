@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Физика Вокруг Нас — Электронная стенгазета</title>
-    <!-- Подключаем Supabase JS -->
     <script src="https://jsdelivr.net"></script>
     <link href="https://googleapis.com" rel="stylesheet">
     <style>
@@ -35,7 +34,6 @@
             min-height: 100vh;
         }
 
-        /* Шапка сайта */
         header {
             background: rgba(19, 27, 46, 0.85);
             backdrop-filter: blur(10px);
@@ -72,11 +70,11 @@
             -webkit-text-fill-color: var(--accent-blue);
         }
 
-        /* Блок авторизации */
         .auth-panel {
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         input[type="email"], input[type="text"], textarea {
@@ -129,14 +127,12 @@
             border: 1px solid var(--accent-purple);
         }
 
-        /* Контейнер */
         .container {
             max-width: 1000px;
             margin: 2rem auto;
             padding: 0 1.5rem;
         }
 
-        /* Панель администратора */
         #admin-panel {
             display: none;
             background: var(--card-bg);
@@ -169,7 +165,6 @@
             color: var(--accent-blue);
         }
 
-        /* Карточка стенгазеты */
         .post-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -208,7 +203,6 @@
             transition: transform 0.2s;
         }
 
-        /* Комментарии */
         .comments-section {
             padding: 1.5rem;
             background: rgba(11, 15, 25, 0.4);
@@ -256,7 +250,6 @@
             font-style: italic;
         }
 
-        /* Модальное окно для увеличения стенгазеты */
         #lightbox {
             display: none;
             position: fixed;
@@ -284,17 +277,13 @@
         <span class="formula-badge">E = mc²</span>
     </div>
 
-    <div class="auth-panel" id="auth-container">
-        <!-- Заполняется через JS -->
-    </div>
+    <div class="auth-panel" id="auth-container"></div>
 </header>
 
 <div class="container">
-    <!-- Панель управления для администраторов -->
     <section id="admin-panel">
         <h2>🛠️ Панель администратора</h2>
         <div class="admin-grid">
-            <!-- Загрузка новой стенгазеты -->
             <div class="admin-box">
                 <h3>Опубликовать новый выпуск (PNG)</h3>
                 <input type="text" id="post-title" placeholder="Название выпуска (например: Выпуск №1. Кванты)">
@@ -303,7 +292,6 @@
                 <button onclick="uploadNewspaper()" id="upload-btn">Опубликовать стенгазету</button>
             </div>
 
-            <!-- Добавление нового администратора -->
             <div class="admin-box">
                 <h3>Управление администраторами</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted);">
@@ -316,13 +304,11 @@
         </div>
     </section>
 
-    <!-- Лента стенгазет -->
     <main id="posts-feed">
         <p style="text-align: center; color: var(--text-muted);">Загрузка выпусков...</p>
     </main>
 </div>
 
-<!-- Полноэкранный просмотр PNG -->
 <div id="lightbox" onclick="this.style.display='none'">
     <img id="lightbox-img" src="" alt="Увеличенная стенгазета">
 </div>
@@ -331,9 +317,28 @@
     // ==========================================
     // ВСТАВЬТЕ СЮДА ДАННЫЕ ИЗ SUPABASE (Settings -> API)
     // ==========================================
-    const SUPABASE_URL = https://jrljcjdggybfgnookqtq.supabase.co/rest/v1/;
-    const SUPABASE_ANON_KEY = sb_publishable_gZu72ZiPnz7vrUa3nuqWyA_1I9lR0qs;
+    const SUPABASE_URL = 'https://jrljcjdggybfgnookqtq.supabase.co/rest/v1/';
+    const SUPABASE_ANON_KEY = 'sb_publishable_gZu72ZiPnz7vrUa3nuqWyA_1I9lR0qs';
     // ==========================================
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Используем имя db вместо supabase, чтобы не было конфликта с библиотекой
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentUserEmail = localStorage.getItem('physics_wall_email') || null;
+    let isAdmin = false;
+
+    async function init() {
+        renderAuthHeader();
+        await checkAdminStatus();
+        renderAuthHeader();
+        await loadPosts();
+    }
+
+    async function checkAdminStatus() {
+        if (!currentUserEmail) {
+            isAdmin = false;
+            document.getElementById('admin-panel').style.display = 'none';
+            return;
+        }
+
 
