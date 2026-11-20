@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Физика Вокруг Нас — Электронная стенгазета</title>
+    <!-- Подключаем Supabase JS -->
+    <script src="https://jsdelivr.net"></script>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --card-bg: #131b2e;
+            --accent-blue: #38bdf8;
+            --accent-purple: #818cf8;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(129, 140, 248, 0.08), transparent 25%);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Шапка сайта */
+        header {
+            background: rgba(19, 27, 46, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .formula-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-blue);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            -webkit-text-fill-color: var(--accent-blue);
+        }
+
+        /* Блок авторизации */
+        .auth-panel {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        input[type="email"], input[type="text"], textarea {
+            background: #0b0f19;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent-blue);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: #0b0f19;
+            font-weight: 600;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.15s, opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button.secondary {
+            background: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            background: #1e293b;
+        }
+
+        .status-admin {
+            background: rgba(129, 140, 248, 0.2);
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Панель администратора */
+        #admin-panel {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--accent-purple);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+
+        .admin-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .admin-box h3 {
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+        }
+
+        /* Карточка стенгазеты */
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 3rem;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .post-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .post-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .post-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .post-image-wrapper {
+            background: #070a11;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .post-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        /* Комментарии */
+        .comments-section {
+            padding: 1.5rem;
+            background: rgba(11, 15, 25, 0.4);
+        }
+
+        .comments-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+
+        .comment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .comment-item {
+            background: var(--card-bg);
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comment-author {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 0.2rem;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .comment-form input {
+            flex: 1;
+        }
+
+        .guest-notice {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Модальное окно для увеличения стенгазеты */
+        #lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            cursor: zoom-out;
+        }
+
+        #lightbox img {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <span>⚛️ ФИЗИКА.LIVE</span>
+        <span class="formula-badge">E = mc²</span>
+    </div>
+
+    <div class="auth-panel" id="auth-container">
+        <!-- Заполняется через JS -->
+    </div>
+</header>
+
+<div class="container">
+    <!-- Панель управления для администраторов -->
+    <section id="admin-panel">
+        <h2>🛠️ Панель администратора</h2>
+        <div class="admin-grid">
+            <!-- Загрузка новой стенгазеты -->
+            <div class="admin-box">
+                <h3>Опубликовать новый выпуск (PNG)</h3>
+                <input type="text" id="post-title" placeholder="Название выпуска (например: Выпуск №1. Кванты)">
+                <input type="text" id="post-desc" placeholder="Краткое описание (необязательно)">
+                <input type="file" id="post-file" accept="image/png">
+                <button onclick="uploadNewspaper()" id="upload-btn">Опубликовать стенгазету</button>
+            </div>
+
+            <!-- Добавление нового администратора -->
+            <div class="admin-box">
+                <h3>Управление администраторами</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    Укажите email пользователя, чтобы выдать ему права публикации стенгазет без пароля.
+                </p>
+                <input type="email" id="new-admin-email" placeholder="email@example.com">
+                <button onclick="addAdmin()">Назначить администратором</button>
+                <div id="admin-list" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Лента стенгазет -->
+    <main id="posts-feed">
+        <p style="text-align: center; color: var(--text-muted);">Загрузка выпусков...</p>
+    </main>
+</div>
+
+<!-- Полноэкранный просмотр PNG -->
+<div id="lightbox" onclick="this.style.display='none'">
+    <img id="lightbox-img" src="" alt="Увеличенная стенгазета">
+</div>
+
+<script>
+    // ==========================================
+    // ВСТАВЬТЕ СЮДА ДАННЫЕ ИЗ SUPABASE (Settings -> API)
+    // ==========================================
+    const SUPABASE_URL = https://jrljcjdggybfgnookqtq.supabase.co/rest/v1/;
+    const SUPABASE_ANON_KEY = sb_publishable_gZu72ZiPnz7vrUa3nuqWyA_1I9lR0qs;
+    // ==========================================
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
